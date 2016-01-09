@@ -1,4 +1,6 @@
 import numpy as np
+from collections import Counter
+import time
 
 class KNearestNeighbor(object):
   """ a kNN classifier with L2 distance """
@@ -64,6 +66,8 @@ class KNearestNeighbor(object):
     num_train = self.X_train.shape[0]
     dists = np.zeros((num_test, num_train))
     for i in xrange(num_test):
+      if i%100 == 0:
+          print("Computeing Dist",i)
       for j in xrange(num_train):
         #####################################################################
         # TODO:                                                             #
@@ -71,7 +75,7 @@ class KNearestNeighbor(object):
         # training point, and store the result in dists[i, j]. You should   #
         # not use a loop over dimension.                                    #
         #####################################################################
-        pass
+        dists[i][j] = np.linalg.norm(X[i] - self.X_train[j])
         #####################################################################
         #                       END OF YOUR CODE                            #
         #####################################################################
@@ -93,7 +97,14 @@ class KNearestNeighbor(object):
       # Compute the l2 distance between the ith test point and all training #
       # points, and store the result in dists[i, :].                        #
       #######################################################################
-      pass
+      tic = time.time()
+      cloned_array = np.array([X[i]]*num_train)
+      toc = time.time()
+      print("time", toc-tic)
+      print("shape",self.X_train.shape)
+      print("shape",cloned_array.shape)
+      dists[i] = np.linalg.norm(self.X_train-cloned_array, axis = 1)
+      
       #######################################################################
       #                         END OF YOUR CODE                            #
       #######################################################################
@@ -145,7 +156,6 @@ class KNearestNeighbor(object):
     for i in xrange(num_test):
       # A list of length k storing the labels of the k nearest neighbors to
       # the ith test point.
-      closest_y = []
       #########################################################################
       # TODO:                                                                 #
       # Use the distance matrix to find the k nearest neighbors of the ith    #
@@ -153,15 +163,18 @@ class KNearestNeighbor(object):
       # neighbors. Store these labels in closest_y.                           #
       # Hint: Look up the function numpy.argsort.                             #
       #########################################################################
-      pass
+      dists_i = dists[i]
+      closest_y = self.y_train[dists_i.argsort()[:k]]
+      
       #########################################################################
       # TODO:                                                                 #
       # Now that you have found the labels of the k nearest neighbors, you    #
       # need to find the most common label in the list closest_y of labels.   #
       # Store this label in y_pred[i]. Break ties by choosing the smaller     #
       # label.                                                                #
+      
       #########################################################################
-      pass
+      y_pred[i] = Counter(closest_y).most_common(1)[0][0]
       #########################################################################
       #                           END OF YOUR CODE                            # 
       #########################################################################
