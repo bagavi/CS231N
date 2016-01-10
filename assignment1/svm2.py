@@ -294,7 +294,6 @@ best_svm = None # The LinearSVM object that achieved the highest validation rate
 # confident that your validation code works, you should rerun the validation   #
 # code with a larger value for num_iters.                                      #
 ################################################################################
-num_iters = 600
 for learning_rate in learning_rates:
     for reg in regularization_strengths:
         print("LR",learning_rate,"reg",reg)
@@ -307,14 +306,8 @@ for learning_rate in learning_rates:
         
         if best_val < np.mean(y_val == y_val_pred):
             best_val = np.mean(y_val == y_val_pred)
-            best_svm = svm
+            best_parameters = { 'LR':learning_rate[0], 'reg': reg}
 
-print best_val
-print best_svm.reg
-print best_svm.learning_rate
-#Train the svm further
-
-svm.train(X_train,y_train,num_iters=1000)
 ################################################################################
 #                              END OF YOUR CODE                                #
 ################################################################################
@@ -357,7 +350,10 @@ plt.title('CIFAR-10 validation accuracy')
 
 
 # In[ ]:
-
+best_svm = LinearSVM()
+best_svm.train(X_train, y_train, learning_rate=best_parameters['LR'], reg=best_parameters['reg'],
+                      num_iters=2000, verbose=True)
+        
 # Evaluate the best svm on test set
 y_test_pred = best_svm.predict(X_test)
 test_accuracy = np.mean(y_test == y_test_pred)
