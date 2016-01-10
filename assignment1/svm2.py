@@ -269,7 +269,7 @@ from cs231n.classifiers import LinearSVM
 # learning rate). You should experiment with different ranges for the learning
 # rates and regularization strengths; if you are careful you should be able to
 # get a classification accuracy of about 0.4 on the validation set.
-learning_rates = [1e-7, 5e-7, 1e-6, 5e-6]
+learning_rates = [( 5e-7,1500), (1e-6,600), (5e-6,400)]
 regularization_strengths = [5e3, 1e4, 5e4, 1e5, 5e5]
 
 # results is dictionary mapping tuples of the form
@@ -299,8 +299,8 @@ for learning_rate in learning_rates:
     for reg in regularization_strengths:
         print("LR",learning_rate,"reg",reg)
         svm = LinearSVM()
-        loss_hist = svm.train(X_train, y_train, learning_rate=learning_rate, reg=reg,
-                      num_iters=num_iters, verbose=True)
+        loss_hist = svm.train(X_train, y_train, learning_rate=learning_rate[0], reg=reg,
+                      num_iters=learning_rate[1], verbose=True)
         y_train_pred = svm.predict(X_train)
         y_val_pred = svm.predict(X_val)
         results[(learning_rate,reg)] = (np.mean(y_train == y_train_pred),np.mean(y_val == y_val_pred))
