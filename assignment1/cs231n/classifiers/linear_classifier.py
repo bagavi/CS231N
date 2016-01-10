@@ -58,8 +58,6 @@ class LinearClassifier(object):
       X_batch = X[batch_indicies]
       y_batch = y[batch_indicies]
       
-      if X_batch.shape != (batch_size,dim):
-          print "Mismatch between", X_batch.shape, "and ", dim,batch_size 
       #########################################################################
       #                       END OF YOUR CODE                                #
       #########################################################################
