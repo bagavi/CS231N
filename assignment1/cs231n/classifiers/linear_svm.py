@@ -56,7 +56,7 @@ def svm_loss_naive(W, X, y, reg):
   # loss is being computed. As a result you may need to modify some of the    #
   # code above to compute the gradient.                                       #
   #############################################################################
-  return loss, dW, Loss
+  return loss, dW
 
 
 def svm_loss_vectorized(W, X, y, reg):
@@ -120,4 +120,4 @@ def svm_loss_vectorized(W, X, y, reg):
   #                             END OF YOUR CODE                              #
   #############################################################################
 
-  return loss, dW, Margin_ge_zero
+  return loss, dW
