@@ -85,7 +85,7 @@ def softmax_loss_vectorized(W, X, y, reg):
   #normarlizing the score
   exp_Scores = (exp_Scores.T/np.sum(exp_Scores, axis = 1)).T
   for i in range(num_train):
-      loss += np.log( exp_Scores[i][y[i]] )
+      loss -= np.log( exp_Scores[i][y[i]] )
   
   for j in range(num_classes):
       dW[:,j] -= np.sum( X.T*exp_Scores[:,j] , axis = 1 )
