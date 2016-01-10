@@ -43,9 +43,9 @@ def softmax_loss_naive(W, X, y, reg):
       #Loss update
       loss += np.log( exp_scores[y[i]]/exp_scores_sum )
       #Gradient update
-      dW[:,y[i]] += X[i]
+      dW[:,y[i]] -= X[i]
       for j in xrange(num_classes):
-        dW[:,j] -= X[i]*exp_scores[j]/exp_scores_sum
+        dW[:,j] += X[i]*exp_scores[j]/exp_scores_sum
   
   loss /= num_train
   dW /= num_train    
@@ -88,13 +88,12 @@ def softmax_loss_vectorized(W, X, y, reg):
       loss -= np.log( exp_Scores[i][y[i]] )
   
   for j in range(num_classes):
-      dW[:,j] -= np.sum( X.T*exp_Scores[:,j] , axis = 1 )
-      dW[:,j] += np.sum(X[np.where(y==j)].T, axis = 1)
+      dW[:,j] += np.sum( X.T*exp_Scores[:,j] , axis = 1 )
+      dW[:,j] -= np.sum(X[np.where(y==j)].T, axis = 1)
       
   
   loss /= num_train
   dW /= num_train
-  dW = dW*-1
   loss +=  0.5 * reg * np.sum(W * W)  
   
   #############################################################################
