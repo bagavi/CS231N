@@ -297,6 +297,7 @@ best_svm = None # The LinearSVM object that achieved the highest validation rate
 num_iters = 600
 for learning_rate in learning_rates:
     for reg in regularization_strengths:
+        print("LR",learning_rate,"reg",reg)
         svm = LinearSVM()
         loss_hist = svm.train(X_train, y_train, learning_rate=learning_rate, reg=reg,
                       num_iters=num_iters, verbose=True)
