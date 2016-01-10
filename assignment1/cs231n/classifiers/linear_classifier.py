@@ -30,12 +30,6 @@ class LinearClassifier(object):
     A list containing the value of the loss function at each training iteration.
     """
     
-    if self.learning_rate is None:
-        self.learning_rate = learning_rate
-    if self.reg is None:
-        self.reg = reg
-    if self.batch_size is None:
-        self.batch_size = batch_size
     num_train, dim = X.shape
     num_classes = np.max(y) + 1 # assume y takes values 0...K-1 where K is number of classes
     
@@ -73,7 +67,7 @@ class LinearClassifier(object):
       # evaluate loss and gradient
       loss, grad = self.loss(X_batch, y_batch, reg)
       if loss > 2*loss_prev:
-          print "PAck up" , loss
+          print "PaCk up" , loss
           break
       loss_history.append(loss)
       loss_prev = loss
@@ -87,7 +81,7 @@ class LinearClassifier(object):
       #                       END OF YOUR CODE                                #
       #########################################################################
 
-      if verbose and (it+1) % 100 == 0:
+      if verbose and (it) % 100 == 0:
         print 'iteration %d / %d: loss %f' % (it, num_iters, loss)
 
     return loss_history
