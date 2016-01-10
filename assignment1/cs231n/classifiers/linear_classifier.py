@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from cs231n.classifiers.linear_svm import *
 from cs231n.classifiers.softmax import *
 
@@ -34,7 +35,7 @@ class LinearClassifier(object):
 
     # Run stochastic gradient descent to optimize W
     loss_history = []
-    loss_prev = inf
+    loss_prev = float('inf')
     for it in xrange(num_iters):
 
       #########################################################################
