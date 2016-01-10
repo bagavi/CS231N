@@ -5,11 +5,13 @@ from cs231n.classifiers.softmax import *
 
 class LinearClassifier(object):
 
-  def __init__(self):
-    self.W = None
-
+  def __init__(self,):
+      self.W = None
+      self.learning_rate = None
+      self.reg = None
+      self.batch_size = None
   def train(self, X, y, learning_rate=1e-3, reg=1e-5, num_iters=100,
-            batch_size=200, verbose=False):
+            batch_size=200, verbose=True):
     """
     Train this linear classifier using stochastic gradient descent.
 
@@ -27,12 +29,20 @@ class LinearClassifier(object):
     Outputs:
     A list containing the value of the loss function at each training iteration.
     """
+    
+    if self.learning_rate is None:
+        self.learning_rate = learning_rate
+    if self.reg is None:
+        self.reg = reg
+    if self.batch_size is None:
+        self.batch_size = batch_size
     num_train, dim = X.shape
     num_classes = np.max(y) + 1 # assume y takes values 0...K-1 where K is number of classes
+    
     if self.W is None:
       # lazily initialize W
-      self.W = 0.001 * np.random.randn(dim, num_classes)
-
+        self.W = 0.001 * np.random.randn(dim, num_classes)
+    
     # Run stochastic gradient descent to optimize W
     loss_history = []
     loss_prev = float('inf')

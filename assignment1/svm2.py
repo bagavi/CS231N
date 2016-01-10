@@ -110,7 +110,7 @@ print 'dev data shape: ', X_dev.shape
 # Preprocessing: subtract the mean image
 # first: compute the image mean based on the training data
 mean_image = np.mean(X_train, axis=0)
-print mean_image[:10] # print a few of the elements
+# print mean_image[:10] # print a few of the elements
 
 
 # In[7]:
@@ -147,10 +147,10 @@ from cs231n.classifiers.linear_svm import svm_loss_naive
 import time
 
 # generate a random SVM weight matrix of small numbers
-W = np.random.randn(3073, 10) * 0.0001
-
-loss, grad,A = svm_loss_naive(W, X_dev, y_dev, 0.00001)
-print 'loss: %f' % (loss, )
+# W = np.random.randn(3073, 10) * 0.0001
+# 
+# loss, grad,A = svm_loss_naive(W, X_dev, y_dev, 0.00001)
+# print 'loss: %f' % (loss, )
 
 
 # The `grad` returned from the function above is right now all zero. Derive and implement the gradient for the SVM cost function and implement it inline inside the function `svm_loss_naive`. You will find it helpful to interleave your new code inside the existing function.
@@ -277,7 +277,7 @@ regularization_strengths = [5e3, 1e4, 5e4, 1e5, 5e5]
 # (training_accuracy, validation_accuracy). The accuracy is simply the fraction
 # of data points that are correctly classified.
 results = {}
-best_val = -1   # The highest validation accuracy that we have seen so far.
+best_val = -1  # The highest validation accuracy that we have seen so far.
 best_svm = None # The LinearSVM object that achieved the highest validation rate.
 
 ################################################################################
@@ -303,7 +303,18 @@ for learning_rate in learning_rates:
                       num_iters=learning_rate[1], verbose=True)
         y_train_pred = svm.predict(X_train)
         y_val_pred = svm.predict(X_val)
-        results[(learning_rate,reg)] = (np.mean(y_train == y_train_pred),np.mean(y_val == y_val_pred))
+        results[(learning_rate[0],reg)] = (np.mean(y_train == y_train_pred),np.mean(y_val == y_val_pred))
+        
+        if best_val < np.mean(y_val == y_val_pred):
+            best_val = np.mean(y_val == y_val_pred)
+            best_svm = svm
+
+print best_val
+print best_svm.reg
+print best_svm.learning_rate
+#Train the svm further
+
+svm.train(X_train,y_train,num_iters=1000)
 ################################################################################
 #                              END OF YOUR CODE                                #
 ################################################################################
@@ -342,7 +353,7 @@ plt.colorbar()
 plt.xlabel('log learning rate')
 plt.ylabel('log regularization strength')
 plt.title('CIFAR-10 validation accuracy')
-plt.show()
+# plt.show()
 
 
 # In[ ]:
@@ -370,7 +381,7 @@ for i in xrange(10):
   plt.imshow(wimg.astype('uint8'))
   plt.axis('off')
   plt.title(classes[i])
-
+plt.show()
 
 # ### Inline question 2:
 # Describe what your visualized SVM weights look like, and offer a brief explanation for why they look they way that they do.
