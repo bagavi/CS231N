@@ -169,6 +169,7 @@ class TwoLayerNet(object):
     """
     num_train = X.shape[0]
     iterations_per_epoch = max(num_train / batch_size, 1)
+    val_acc = 0
 
     # Use SGD to optimize the parameters in self.model
     loss_history = []
@@ -206,7 +207,7 @@ class TwoLayerNet(object):
       #########################################################################
 
       if verbose and it % 100 == 0:
-        print 'iteration %d / %d: loss %f' % (it, num_iters, loss)
+        print 'iteration %d / %d: loss %f, val_acc %f' % (it, num_iters, loss, val_acc)
 
       # Every epoch, check train and val accuracy and decay learning rate.
       if it % iterations_per_epoch == 0:
@@ -215,7 +216,6 @@ class TwoLayerNet(object):
         val_acc = (self.predict(X_val) == y_val).mean()
         train_acc_history.append(train_acc)
         val_acc_history.append(val_acc)
-
         # Decay learning rate
         learning_rate *= learning_rate_decay
 
