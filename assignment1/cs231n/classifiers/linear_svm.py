@@ -1,5 +1,7 @@
 import numpy as np
 from random import shuffle
+from numpy import corrcoef
+import time
 
 def svm_loss_naive(W, X, y, reg):
   """
@@ -75,31 +77,19 @@ def svm_loss_vectorized(W, X, y, reg):
   # result in loss.                                                           #
   #############################################################################
   #Calculating the score
-  Scores = X.dot(W)
-  Correct_class_scores = np.array( [ [ Scores[i][y[i]] ]*num_classes for i in range(num_train) ] )
+  scores = X.dot(W)
+  Y = np.zeros(scores.shape)
+  for i,row in enumerate(Y):
+    row[y[i]] = 1
   
-  #Creating the delta matrix, with zeros at the correct class
-  matrix1 = np.ones(Scores.shape)
-  for i in range(num_train):
-      matrix1[i][y[i]] = 0
-  #calculating the margin
-  Margin = Scores - Correct_class_scores + matrix1
-  
-  Margin_ge_zero = np.maximum(Margin, np.zeros(Margin.shape))
-  
-  loss += np.sum(Margin_ge_zero)/num_train
-  loss += 0.5 * reg * np.sum(W * W)
-  
-  X_with_margin_count = np.multiply(X.T , ( Margin_ge_zero !=0).sum(1) ).T
-  for j in range(num_classes):
-      Margin_j  = np.where( Margin_ge_zero[:,j] > 0 )
-      #Margin_j = range(num_train)
+  Correct_class_scores = np.array( [ [ scores[i][y[i]] ]*num_classes for i in range(num_train) ] )  
+  Margin = scores - Correct_class_scores + ((scores - Correct_class_scores) != 0)
+  X_with_margin_count = np.multiply(X.T , ( Margin > 0).sum(1) ).T
 
-      dW[:,j]  += sum( X[Margin_j] )   
-      #data_of_class_j = range(num_train)
-      data_of_class_j = np.where(y==j)
-      dW[:,j] -= sum( X_with_margin_count[data_of_class_j] )
-  dW   /= num_train
+  loss += np.sum((Margin>0)*Margin)/num_train
+  loss += 0.5 * reg * np.sum(W * W)
+  dW += ( Margin > 0 ).T.dot(X_with_margin_count).T/num_train
+  dW -= (Margin == 0).T.dot(X_with_margin_count).T/num_train
   dW += reg*W
   #############################################################################
   #                             END OF YOUR CODE                              #
