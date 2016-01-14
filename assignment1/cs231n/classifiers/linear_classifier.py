@@ -64,9 +64,6 @@ class LinearClassifier(object):
 
       # evaluate loss and gradient
       loss, grad = self.loss(X_batch, y_batch, reg)
-      if loss > 2*loss_prev:
-          print "PaCk up" , loss
-          break
       loss_history.append(loss)
       loss_prev = loss
       # perform parameter update
