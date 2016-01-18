@@ -41,7 +41,7 @@ def softmax_loss_naive(W, X, y, reg):
       exp_scores = pow(math.e, scores)
       exp_scores_sum = sum(exp_scores)
       #Loss update
-      loss += np.log( exp_scores[y[i]]/exp_scores_sum )
+      loss -= np.log( exp_scores[y[i]]/exp_scores_sum )
       #Gradient update
       dW[:,y[i]] -= X[i]
       for j in xrange(num_classes):

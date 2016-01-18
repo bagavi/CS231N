@@ -66,8 +66,6 @@ class KNearestNeighbor(object):
     num_train = self.X_train.shape[0]
     dists = np.zeros((num_test, num_train))
     for i in xrange(num_test):
-      if i%100 == 0:
-          print("Computeing Dist",i)
       for j in xrange(num_train):
         #####################################################################
         # TODO:                                                             #
@@ -100,9 +98,6 @@ class KNearestNeighbor(object):
       tic = time.time()
       cloned_array = np.array([X[i]]*num_train)
       toc = time.time()
-      print("time", toc-tic)
-      print("shape",self.X_train.shape)
-      print("shape",cloned_array.shape)
       dists[i] = np.linalg.norm(self.X_train-cloned_array, axis = 1)
       
       #######################################################################
