@@ -149,7 +149,7 @@ class TwoLayerNet(object):
   def train(self, X, y, X_val, y_val,
             learning_rate=1e-3, learning_rate_decay=0.95,
             reg=1e-5, num_iters=100,
-            batch_size=200, verbose=False):
+            batch_size=200, verbose=False ,dropout_fraction = 0):
     """
     Train this neural network using stochastic gradient descent.
 
@@ -167,6 +167,12 @@ class TwoLayerNet(object):
     - batch_size: Number of training examples to use per step.
     - verbose: boolean; if true print progress during optimization.
     """
+    
+    #Dropout
+    Binom_variables = np.random.choice([0, 1], size=X.shape, p=[dropout_fraction,1-dropout_fraction])
+    X = (X*Binom_variables)/(1-dropout_fraction)
+    
+    
     num_train = X.shape[0]
     iterations_per_epoch = max(num_train / batch_size, 1)
     val_acc = 0
@@ -207,6 +213,7 @@ class TwoLayerNet(object):
       #########################################################################
 
       if verbose and it % 100 == 0:
+        val_acc = (self.predict(X_val) == y_val).mean()
         print 'iteration %d / %d: loss %f, val_acc %f' % (it, num_iters, loss, val_acc)
 
       # Every epoch, check train and val accuracy and decay learning rate.
