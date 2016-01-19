@@ -66,6 +66,8 @@ class KNearestNeighbor(object):
     num_train = self.X_train.shape[0]
     dists = np.zeros((num_test, num_train))
     for i in xrange(num_test):
+      if i%100 == 0:
+          print("Computeing Dist",i)
       for j in xrange(num_train):
         #####################################################################
         # TODO:                                                             #
@@ -98,6 +100,9 @@ class KNearestNeighbor(object):
       tic = time.time()
       cloned_array = np.array([X[i]]*num_train)
       toc = time.time()
+      print("time", toc-tic)
+      print("shape",self.X_train.shape)
+      print("shape",cloned_array.shape)
       dists[i] = np.linalg.norm(self.X_train-cloned_array, axis = 1)
       
       #######################################################################
@@ -127,7 +132,28 @@ class KNearestNeighbor(object):
     # HINT: Try to formulate the l2 distance using matrix multiplication    #
     #       and two broadcast sums.                                         #
     #########################################################################
-    pass
+    X_train_2 = self.X_train*self.X_train
+    X_train_2 = np.sum(X_train_2, axis = 1)
+    
+    X_train_2_repeat = np.array([X_train_2]*X.shape[0])
+    
+    X_2 = X*X
+    X_2 = np.sum(X_2, axis = 1)
+    X_2_repeat = np.array( [X_2]*self.X_train.shape[0]).transpose()
+    
+    X_dot_X_train = X.dot(self.X_train.T)
+    
+#     print X_train_2_repeat.shape
+#     print X_2_repeat.shape
+#     print X_dot_X_train.shape
+#     
+#     
+#     print X_train_2_repeat ,"\n"
+#     print X_2_repeat ,"\n"
+#     print 2*X_dot_X_train
+    dists = X_train_2_repeat + X_2_repeat - 2*X_dot_X_train
+    dists = np.sqrt(dists)
+    
     #########################################################################
     #                         END OF YOUR CODE                              #
     #########################################################################

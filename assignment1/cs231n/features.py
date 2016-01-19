@@ -66,6 +66,17 @@ def rgb2gray(rgb):
   return np.dot(rgb[...,:3], [0.299, 0.587, 0.144])
 
 
+def hog_feature_color(im):
+  No_colors = im.shape[-1]
+  color_feature = []
+  for color_index in range(No_colors):
+      im_color       = im[:,:,color_index]
+      temp = hog_feature(im_color)
+      color_feature += list(hog_feature(im_color))
+  
+  color_feature = np.array(color_feature)
+  return color_feature
+
 def hog_feature(im):
   """Compute Histogram of Gradient (HOG) feature for an image
   
@@ -88,8 +99,8 @@ def hog_feature(im):
   if im.ndim == 3:
     image = rgb2gray(im)
   else:
-    image = np.at_least_2d(im)
-
+    image = np.atleast_2d(im)
+ 
   sx, sy = image.shape # image size
   orientations = 9 # number of gradient bins
   cx, cy = (8, 8) # pixels per cell
@@ -144,5 +155,3 @@ def color_histogram_hsv(im, nbin=10, xmin=0, xmax=255, normalized=True):
   # return histogram
   return imhist
 
-
-pass
