@@ -24,7 +24,14 @@ def affine_forward(x, w, b):
   # TODO: Implement the affine forward pass. Store the result in out. You     #
   # will need to reshape the input into rows.                                 #
   #############################################################################
-  pass
+  x_shape = x.shape
+  #Reshaping it as N*D
+  #x_shape[0] is equal to N
+  x = x.reshape( [ x_shape[0], np.prod( x_shape[1:]) ] )
+  
+  #Taking dot product of X(N,D) and Y(D,M) and adding the bias
+  
+  out = x.dot(w) + b
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
