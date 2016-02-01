@@ -59,12 +59,16 @@ def affine_backward(dout, cache):
   #############################################################################
   # TODO: Implement the affine backward pass.                                 #
   #############################################################################
-  pass
+  dx = np.empty_like(x)
+  dw = np.empty_like(w)
+  db = np.empty_like(b)
+  dx += dout.dot(w.T)
+  dw += dout.dot(x.T)
+  db += dout
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
   return dx, dw, db
-
 
 def relu_forward(x):
   """
