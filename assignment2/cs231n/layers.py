@@ -63,7 +63,7 @@ def affine_backward(dout, cache):
   dw = np.empty_like(w)
   db = np.empty_like(b)
   dx += dout.dot(w.T)
-  dw += dout.dot(x.T)
+  dw += dout.dot(x.T).T
   db += dout
   #############################################################################
   #                             END OF YOUR CODE                              #
