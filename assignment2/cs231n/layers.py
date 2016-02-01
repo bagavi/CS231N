@@ -35,7 +35,7 @@ def affine_forward(x, w, b):
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
-  cache = (x, w, b)
+  cache = (x, w, b, x_shape)
   return out, cache
 
 
@@ -54,17 +54,23 @@ def affine_backward(dout, cache):
   - dw: Gradient with respect to w, of shape (D, M)
   - db: Gradient with respect to b, of shape (M,)
   """
-  x, w, b = cache
+  x, w, b, x_shape = cache
   dx, dw, db = None, None, None
   #############################################################################
   # TODO: Implement the affine backward pass.                                 #
   #############################################################################
-  dx = np.empty_like(x)
-  dw = np.empty_like(w)
-  db = np.empty_like(b)
+  
+  dx = np.zeros_like(x)
+  dw = np.zeros_like(w)
+  db = np.zeros_like(b)
+  
   dx += dout.dot(w.T)
-  dw += dout.dot(x.T)
-  db += dout
+  dw += x.T.dot(dout)
+  db += dout.sum( axis = 0)
+  
+  # Reshaping dx
+  dx = dx.reshape(x_shape)
+
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
@@ -85,7 +91,7 @@ def relu_forward(x):
   #############################################################################
   # TODO: Implement the ReLU forward pass.                                    #
   #############################################################################
-  pass
+  out = np.maximum(x, np.zeros_like(x))
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
@@ -108,7 +114,8 @@ def relu_backward(dout, cache):
   #############################################################################
   # TODO: Implement the ReLU backward pass.                                   #
   #############################################################################
-  pass
+  dx = np.zeros_like(x)
+  dx += (x>0)*dout
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
