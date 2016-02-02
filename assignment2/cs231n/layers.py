@@ -30,7 +30,6 @@ def affine_forward(x, w, b):
   x = x.reshape( [ x_shape[0], np.prod( x_shape[1:]) ] )
   
   #Taking dot product of X(N,D) and Y(D,M) and adding the bias
-  
   out = x.dot(w) + b
   #############################################################################
   #                             END OF YOUR CODE                              #
@@ -299,7 +298,8 @@ def dropout_forward(x, dropout_param):
     # TODO: Implement the training phase forward pass for inverted dropout.   #
     # Store the dropout mask in the mask variable.                            #
     ###########################################################################
-    pass
+    mask = np.random.random(x.shape) > p
+    out  = x*mask
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################
@@ -307,7 +307,7 @@ def dropout_forward(x, dropout_param):
     ###########################################################################
     # TODO: Implement the test phase forward pass for inverted dropout.       #
     ###########################################################################
-    pass
+    out = x
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################
@@ -334,7 +334,7 @@ def dropout_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the training phase backward pass for inverted dropout.  #
     ###########################################################################
-    pass
+    dx = dout*mask
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################
