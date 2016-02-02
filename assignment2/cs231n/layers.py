@@ -1,5 +1,5 @@
 import numpy as np
-
+import math
 
 def affine_forward(x, w, b):
   """
@@ -191,7 +191,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     x_hat = ( x - sample_mean )/(np.sqrt( sample_var + eps ))
     out = x_hat*gamma + beta
     
-    cache = (gamma, beta, sample_var, sample_mean, x, x_hat)
+    cache = (gamma, beta, sample_var, sample_mean, x_hat, x , eps)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -242,12 +242,32 @@ def batchnorm_backward(dout, cache):
   # TODO: Implement the backward pass for batch normalization. Store the      #
   # results in the dx, dgamma, and dbeta variables.                           #
   #############################################################################
-  pass
+
+  gamma, beta, sample_var, sample_mean, x_hat, x , eps = cache
+
+  dbeta = np.zeros_like(beta)
+  dgamma = np.zeros_like(gamma)
+  dmean = np.zeros_like(sample_mean)
+  dvar = np.zeros_like(sample_var)
+  dx_hat = np.zeros_like(x_hat)
+  dx = np.zeros_like(x)
+    
+  dbeta = np.sum(dout , axis = 0)
+  dgamma = np.sum(dout*x_hat, axis = 0)
+    
+  ###########################################################################################################################
+  # Everything above is fine
+  dx_hat = dout*gamma
+  dvar   = -0.5*np.sum( dx_hat*(x - sample_mean)*np.power( (sample_var + eps) , -1.5), axis=0)
+  dmean  = -1*np.sum( dx_hat/np.power(sample_var + eps , 0.5), axis = 0)
+  dx  = dx_hat*np.power(sample_var + eps , -0.5)
+  dx += 2*dvar*(x - sample_mean)/x.shape[0]
+  dx += dmean/x.shape[0]
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
 
-  return dx, dgamma, dbeta
+  return dx, dgamma, dbeta, dmean
 
 
 def batchnorm_backward_alt(dout, cache):
@@ -272,7 +292,7 @@ def batchnorm_backward_alt(dout, cache):
   # should be able to compute gradients with respect to the inputs in a       #
   # single statement; our implementation fits on a single 80-character line.  #
   #############################################################################
-  pass
+  
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
