@@ -267,7 +267,7 @@ def batchnorm_backward(dout, cache):
   #                             END OF YOUR CODE                              #
   #############################################################################
 
-  return dx, dgamma, dbeta, dmean
+  return dx, dgamma, dbeta
 
 
 def batchnorm_backward_alt(dout, cache):

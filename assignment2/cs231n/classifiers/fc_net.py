@@ -183,13 +183,20 @@ class FullyConnectedNet(object):
     # First layer
     self.params['W1'] = np.random.normal(0,weight_scale,[input_dim,hidden_dims[0]])
     self.params['b1'] = np.zeros(hidden_dims[0])
+    if self.use_batchnorm:
+      self.params['y1'] = np.random.normal( 1 , 1e-3, hidden_dims[0] )
+      self.params['beta1'] = np.zeros( hidden_dims[0] )
 
     for layer in range( self.num_layers - 2 ):
       Wi = 'W'+str(layer+2)
       bi = 'b'+str(layer+2)
-      
+      yi = 'y'+str(layer+2)
+      betai = 'beta'+str(layer+2)
       self.params[Wi] = np.random.normal( 0, weight_scale, [ hidden_dims[layer], hidden_dims[layer+1] ] )
       self.params[bi] = np.zeros( hidden_dims[layer+1] )
+      if self.use_batchnorm:
+        self.params[yi] = np.random.normal( 1 , 1e-3,hidden_dims[layer+1])
+        self.params[betai] = np.zeros( hidden_dims[layer+1] )
           
     #Last layer
     Wi = 'W'+str(self.num_layers)
@@ -224,8 +231,6 @@ class FullyConnectedNet(object):
     # Cast all parameters to the correct datatype
     for k, v in self.params.iteritems():
       self.params[k] = v.astype(dtype)
-
-
   def loss(self, X, y=None):
     """
     Compute loss and gradient for the fully-connected net.
@@ -261,11 +266,16 @@ class FullyConnectedNet(object):
     for layer in range( self.num_layers - 1):
       Wi = 'W'+str(layer+1)
       bi = 'b'+str(layer+1)
-      out, cache = affine_relu_forward(input_data, self.params[Wi], self.params[bi])
+      yi = 'y'+str(layer+1)
+      betai = 'beta'+str(layer+1)
+      if self.use_batchnorm:
+          out, cache = affine_batchnorm_relu_forward( input_data, self.params[Wi], self.params[bi],
+                                                 self.params[yi], self.params[betai], self.bn_params[layer] )
+      else:
+          out, cache = affine_relu_forward( input_data, self.params[Wi], self.params[bi] )
       out, dropout_cache = dropout_forward(out, self.dropout_param )
       input_data = out
       output[layer] =  { 'out_data':out, 'cache': cache, 'dropout_cache' : dropout_cache }
-    
     #Final Layer
     layer += 1
     Wi = 'W'+str(self.num_layers)
@@ -282,7 +292,6 @@ class FullyConnectedNet(object):
     # If test mode return early
     if mode == 'test':
       return scores
-
     loss, grads = 0.0, {}
     ############################################################################
     # TODO: Implement the backward pass for the fully-connected net. Store the #
@@ -315,8 +324,16 @@ class FullyConnectedNet(object):
     for layer in range(self.num_layers-1)[::-1]:
       Wi = 'W'+str(layer+1)
       bi = 'b'+str(layer+1)
+      yi = 'y'+str(layer+1)
+      betai = 'beta'+str(layer+1)
       dx = dropout_backward(dx, output[layer]['dropout_cache'] )
-      dx, grads[Wi], grads[bi] = affine_relu_backward( dx, output[layer]['cache'] )                         
+      
+      # Storing the gradients
+      if self.use_batchnorm:
+          dx, grads[Wi], grads[bi], grads[yi], grads[betai] = affine_batchnorm_relu_backward( dx, output[layer]['cache'] )  
+      else:
+          dx, grads[Wi], grads[bi] = affine_relu_backward( dx, output[layer]['cache'] )  
+            # Loss due to the regularazitation parameter.
       grads[Wi] += self.reg*self.params[Wi]
 
     ############################################################################
