@@ -84,7 +84,7 @@ class TwoLayerNet(object):
     aff_relu_out, aff_relu_cache = affine_relu_forward(X, self.params['W1'], self.params['b1'])
     
     #Pass 2
-    aff2_out, aff_cache = affine_forward(aff_relu_out, self.params['W2'], self.params['b2'])
+    aff2_out, aff2_cache = affine_forward(aff_relu_out, self.params['W2'], self.params['b2'])
     
     scores = aff2_out
     ############################################################################
@@ -110,7 +110,7 @@ class TwoLayerNet(object):
     loss += sftm_loss + .5*self.reg*np.sum(self.params['W1']*self.params['W1'])
     loss += .5*self.reg*np.sum(self.params['W2']*self.params['W2']) 
     
-    dx_1, grads['W2'], grads['b2'] = affine_backward(sftm_grad,aff_cache)
+    dx_1, grads['W2'], grads['b2'] = affine_backward(sftm_grad,aff2_cache)
     dx_2, grads['W1'], grads['b1'] = affine_relu_backward(dx_1,aff_relu_cache)
     
     grads['W1'] += self.reg*self.params['W1']

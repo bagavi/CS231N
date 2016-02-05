@@ -407,7 +407,7 @@ def conv_forward_naive(x, w, b, conv_param):
   
   
   Ho = 1 + (H + 2 * pad - HH)/stride
-  Wo = 1 + (W + 2 * pad - WW) / stride
+  Wo = 1 + (W + 2 * pad - WW)/stride
   out = np.zeros( (N, F, Ho, Wo) )
   #############################################################################
   # TODO: Implement the convolutional forward pass.                           #
@@ -417,20 +417,13 @@ def conv_forward_naive(x, w, b, conv_param):
   #Padding only on H and W axis
   x =  np.pad(x, [(0,0),(0,0),(pad, pad), (pad, pad)], mode='constant')
   
-  #Calculating the shape of X again
-  N, C, H, W = x.shape
-  for i1 in range(N):
-    for i2 in range(F):
-      for i3 in range(Ho):
-        for i4 in range(Wo):
-          print "X", x[ i1, : , i3:i3+HH, i4:i4+WW ]
-          print "w", w[ i2 ]
-          print "prod", x[i1, : , i3:i3+HH, i4:i4+WW]*w[i2]
-          e = input("fuck")
-          out[i1][i2][i3][i4] = np.sum( x[i1, : , i3:i3+HH, i4:i4+WW]*w[i2] ) + b[i2]
-  print x.shape, "X"
-  print w.shape, "W"
-  print out.shape, "OUT"
+  #Looping
+  for i1 in xrange(N):
+    for i2 in xrange(F):
+      for i3 in xrange(Ho):
+        for i4 in xrange(Wo):
+          out[i1,i2,i3,i4]=np.sum(x[i1, : , i3*stride:i3*stride+HH, i4*stride:i4*stride+WW]*w[i2,:,:,:]) + b[i2]
+
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
@@ -452,13 +445,35 @@ def conv_backward_naive(dout, cache):
   - db: Gradient with respect to b
   """
   dx, dw, db = None, None, None
+  #Extracting the cache
+  x, w, b, conv_param = cache
+  N, C, H, W = x.shape
+  F, _, HH, WW = w.shape
+  stride = conv_param['stride']
+  pad = conv_param['pad']
+  Ho = 1 + (H + - HH)/stride
+  Wo = 1 + (W + - WW)/stride
+  
+  #Initialization
+  dx = np.zeros_like(x)
+  dw = np.zeros_like(w)
+  db = np.zeros_like(b)
+
   #############################################################################
   # TODO: Implement the convolutional backward pass.                          #
   #############################################################################
-  pass
+  db = np.sum(dout ,axis=(0,2,3))
+  #Calculating the shape of X again
+  for i1 in xrange(N):
+    for i2 in xrange(F):
+      for i3 in xrange(Ho):
+        for i4 in xrange(Wo):
+          dx[i1, : , i3*stride:i3*stride+HH, i4*stride:i4*stride+WW] += w[i2,:,:,:]*dout[i1,i2,i3,i4]
+          dw[i2,:,:,:] += x[i1, : , i3*stride:i3*stride+HH, i4*stride:i4*stride+WW]*dout[i1,i2,i3,i4]
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
+  dx = dx[:,:,1:-1,1:-1]
   return dx, dw, db
 
 
@@ -478,10 +493,25 @@ def max_pool_forward_naive(x, pool_param):
   - cache: (x, pool_param)
   """
   out = None
+  #Extracting variables
+  N, C, H, W = x.shape
+  stride      = pool_param['stride']
+  pool_height = pool_param['pool_height']
+  pool_width  = pool_param['pool_width']
+
+  Ho = 1 + (H + - pool_height)/stride
+  Wo = 1 + (W + - pool_width)/stride
+
+  out = np.zeros([N,C,Ho,Wo])
   #############################################################################
   # TODO: Implement the max pooling forward pass                              #
   #############################################################################
-  pass
+  for i1 in xrange(N):
+    for i2 in xrange(C):
+      for i3 in xrange(Ho):
+        for i4 in xrange(Wo):
+          out[i1, i2, i3, i4] = np.max(x[i1, i2 , i3*stride:i3*stride+pool_height, i4*stride:i4*stride+pool_width])
+
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
@@ -500,11 +530,28 @@ def max_pool_backward_naive(dout, cache):
   Returns:
   - dx: Gradient with respect to x
   """
-  dx = None
+  x, pool_param = cache
+  #Extracting variables
+  N, C, H, W = x.shape
+  stride      = pool_param['stride']
+  pool_height = pool_param['pool_height']
+  pool_width  = pool_param['pool_width']
+
+  Ho = 1 + (H + - pool_height)/stride
+  Wo = 1 + (W + - pool_width)/stride
+  dx = np.zeros_like(x)
   #############################################################################
   # TODO: Implement the max pooling backward pass                             #
   #############################################################################
-  pass
+  for i1 in xrange(N):
+    for i2 in xrange(C):
+      for i3 in xrange(Ho):
+        for i4 in xrange(Wo):
+          window = x[i1, i2 , i3*stride:i3*stride+pool_height, i4*stride:i4*stride+pool_width]
+          maxarg_index = np.unravel_index(window.argmax(), window.shape)
+          dx[i1, i2, maxarg_index[0]+i3*stride, maxarg_index[1]+i4*stride] = dout[i1, i2, i3, i4]
+
+  
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
