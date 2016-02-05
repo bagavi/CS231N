@@ -399,12 +399,38 @@ def conv_forward_naive(x, w, b, conv_param):
     W' = 1 + (W + 2 * pad - WW) / stride
   - cache: (x, w, b, conv_param)
   """
-  out = None
+  #Extracting variables
+  N, C, H, W = x.shape
+  F, C, HH, WW = w.shape
+  stride = conv_param['stride']
+  pad = conv_param['pad']
+  
+  
+  Ho = 1 + (H + 2 * pad - HH)/stride
+  Wo = 1 + (W + 2 * pad - WW) / stride
+  out = np.zeros( (N, F, Ho, Wo) )
   #############################################################################
   # TODO: Implement the convolutional forward pass.                           #
   # Hint: you can use the function np.pad for padding.                        #
   #############################################################################
-  pass
+  
+  #Padding only on H and W axis
+  x =  np.pad(x, [(0,0),(0,0),(pad, pad), (pad, pad)], mode='constant')
+  
+  #Calculating the shape of X again
+  N, C, H, W = x.shape
+  for i1 in range(N):
+    for i2 in range(F):
+      for i3 in range(Ho):
+        for i4 in range(Wo):
+          print "X", x[ i1, : , i3:i3+HH, i4:i4+WW ]
+          print "w", w[ i2 ]
+          print "prod", x[i1, : , i3:i3+HH, i4:i4+WW]*w[i2]
+          e = input("fuck")
+          out[i1][i2][i3][i4] = np.sum( x[i1, : , i3:i3+HH, i4:i4+WW]*w[i2] ) + b[i2]
+  print x.shape, "X"
+  print w.shape, "W"
+  print out.shape, "OUT"
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
