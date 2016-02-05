@@ -92,7 +92,7 @@ class ThreeLayerConvNet(object):
     conv_relu_out, conv_relu_cache = conv_relu_forward(X, W1, b1, conv_param)
     maxpool_out, maxpool_cache     = max_pool_forward_fast(conv_relu_out, pool_param)
     aff_relu_out, aff_relu_cache   = affine_relu_forward(maxpool_out, W2, b2)
-    aff2_out, aff2_cache            = affine_forward(aff_relu_out, W3, b3)
+    aff2_out, aff2_cache           = affine_forward(aff_relu_out, W3, b3)
     scores = aff2_out
     ############################################################################
     #                             END OF YOUR CODE                             #
@@ -112,11 +112,15 @@ class ThreeLayerConvNet(object):
     loss += sftm_loss + .5*self.reg*np.sum(W1*W1) + .5*self.reg*np.sum(W2*W2) + .5*self.reg*np.sum(W3*W3)
     
     
-    dx_3, grads['W3'], grads['b3'] = affine_backward(sftm_grad,aff2_cache)
-    dx_2, grads['W2'], grads['b2'] = affine_relu_backward(dx_3,aff_relu_cache)
+    dx_3, grads['W3'], grads['b3'] = affine_backward( sftm_grad, aff2_cache )
+    dx_2, grads['W2'], grads['b2'] = affine_relu_backward( dx_3, aff_relu_cache )
+    dx_2_prime                     = max_pool_backward_fast( dx_2, maxpool_cache )
+    dx_1, grads['W1'], grads['b1'] = conv_relu_backward( dx_2_prime, conv_relu_cache )
+    
     
     grads['W1'] += self.reg*W1
     grads['W2'] += self.reg*W2
+    grads['W3'] += self.reg*W3
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
