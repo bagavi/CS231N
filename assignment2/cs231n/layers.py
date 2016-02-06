@@ -120,7 +120,6 @@ def relu_backward(dout, cache):
   #############################################################################
   return dx
 
-
 def batchnorm_forward(x, gamma, beta, bn_param):
   """
   Forward pass for batch normalization.
@@ -220,6 +219,81 @@ def batchnorm_forward(x, gamma, beta, bn_param):
   return out, cache
 
 
+def spatial_batchnorm_forward(x, gamma, beta, bn_param):
+  """
+  Computes the forward pass for spatial batch normalization.
+  
+  Inputs:
+  - x: Input data of shape (N, C, H, W)
+  - gamma: Scale parameter, of shape (C,)
+  - beta: Shift parameter, of shape (C,)
+  - bn_param: Dictionary with the following keys:
+    - mode: 'train' or 'test'; required
+    - eps: Constant for numeric stability
+    - momentum: Constant for running mean / variance. momentum=0 means that
+      old information is discarded completely at every time step, while
+      momentum=1 means that new information is never incorporated. The
+      default of momentum=0.9 should work well in most situations.
+    - running_mean: Array of shape (D,) giving running mean of features
+    - running_var Array of shape (D,) giving running variance of features
+    
+  Returns a tuple of:
+  - out: Output data, of shape (N, C, H, W)
+  - cache: Values needed for the backward pass
+  """
+  out, cache = None, None
+
+  #############################################################################
+  # TODO: Implement the forward pass for spatial batch normalization.         #
+  #                                                                           #
+  # HINT: You can implement spatial batch normalization using the vanilla     #
+  # version of batch normalization defined above. Your implementation should  #
+  # be very short; ours is less than five lines.                              #
+  #############################################################################
+  #Re-shaping
+  N, C, H, W = x.shape
+  x_reshaped = x.swapaxes(0,1).reshape(C,N*H*W).swapaxes(0,1)
+  out, cache = batchnorm_forward(x_reshaped, gamma, beta, bn_param)
+  out        = out.swapaxes(0,1).reshape(C,N,H,W).swapaxes(0,1)
+  #############################################################################
+  #                             END OF YOUR CODE                              #
+  #############################################################################
+
+  return out, cache
+
+
+def spatial_batchnorm_backward(dout, cache):
+  """
+  Computes the backward pass for spatial batch normalization.
+  
+  Inputs:
+  - dout: Upstream derivatives, of shape (N, C, H, W)
+  - cache: Values from the forward pass
+  
+  Returns a tuple of:
+  - dx: Gradient with respect to inputs, of shape (N, C, H, W)
+  - dgamma: Gradient with respect to scale parameter, of shape (C,)
+  - dbeta: Gradient with respect to shift parameter, of shape (C,)
+  """
+  dx, dgamma, dbeta = None, None, None
+
+  #############################################################################
+  # TODO: Implement the backward pass for spatial batch normalization.        #
+  #                                                                           #
+  # HINT: You can implement spatial batch normalization using the vanilla     #
+  # version of batch normalization defined above. Your implementation should  #
+  # be very short; ours is less than five lines.                              #
+  #############################################################################
+  N, C, H, W = dout.shape
+  dout_reshaped = dout.swapaxes(0,1).reshape(C,N*H*W).swapaxes(0,1)
+  dx, dgamma, dbeta = batchnorm_backward( dout_reshaped, cache )
+  dx = dx.swapaxes(0,1).reshape(C,N,H,W).swapaxes(0,1)
+  #############################################################################
+  #                             END OF YOUR CODE                              #
+  #############################################################################
+
+  return dx, dgamma, dbeta
+  
 def batchnorm_backward(dout, cache):
   """
   Backward pass for batch normalization.
@@ -260,9 +334,9 @@ def batchnorm_backward(dout, cache):
   dx_hat = dout*gamma
   dvar   = -0.5*np.sum( dx_hat*(x - sample_mean)*np.power( (sample_var + eps) , -1.5), axis=0)
   dmean  = -1*np.sum( dx_hat/np.power(sample_var + eps , 0.5), axis = 0)
-  dx  = dx_hat*np.power(sample_var + eps , -0.5)
-  dx += 2*dvar*(x - sample_mean)/x.shape[0]
-  dx += dmean/x.shape[0]
+  dx     = dx_hat*np.power(sample_var + eps , -0.5)
+  dx    += 2*dvar*(x - sample_mean)/x.shape[0]
+  dx    += dmean/x.shape[0]
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
@@ -557,75 +631,6 @@ def max_pool_backward_naive(dout, cache):
   #############################################################################
   return dx
 
-
-def spatial_batchnorm_forward(x, gamma, beta, bn_param):
-  """
-  Computes the forward pass for spatial batch normalization.
-  
-  Inputs:
-  - x: Input data of shape (N, C, H, W)
-  - gamma: Scale parameter, of shape (C,)
-  - beta: Shift parameter, of shape (C,)
-  - bn_param: Dictionary with the following keys:
-    - mode: 'train' or 'test'; required
-    - eps: Constant for numeric stability
-    - momentum: Constant for running mean / variance. momentum=0 means that
-      old information is discarded completely at every time step, while
-      momentum=1 means that new information is never incorporated. The
-      default of momentum=0.9 should work well in most situations.
-    - running_mean: Array of shape (D,) giving running mean of features
-    - running_var Array of shape (D,) giving running variance of features
-    
-  Returns a tuple of:
-  - out: Output data, of shape (N, C, H, W)
-  - cache: Values needed for the backward pass
-  """
-  out, cache = None, None
-
-  #############################################################################
-  # TODO: Implement the forward pass for spatial batch normalization.         #
-  #                                                                           #
-  # HINT: You can implement spatial batch normalization using the vanilla     #
-  # version of batch normalization defined above. Your implementation should  #
-  # be very short; ours is less than five lines.                              #
-  #############################################################################
-  pass
-  #############################################################################
-  #                             END OF YOUR CODE                              #
-  #############################################################################
-
-  return out, cache
-
-
-def spatial_batchnorm_backward(dout, cache):
-  """
-  Computes the backward pass for spatial batch normalization.
-  
-  Inputs:
-  - dout: Upstream derivatives, of shape (N, C, H, W)
-  - cache: Values from the forward pass
-  
-  Returns a tuple of:
-  - dx: Gradient with respect to inputs, of shape (N, C, H, W)
-  - dgamma: Gradient with respect to scale parameter, of shape (C,)
-  - dbeta: Gradient with respect to shift parameter, of shape (C,)
-  """
-  dx, dgamma, dbeta = None, None, None
-
-  #############################################################################
-  # TODO: Implement the backward pass for spatial batch normalization.        #
-  #                                                                           #
-  # HINT: You can implement spatial batch normalization using the vanilla     #
-  # version of batch normalization defined above. Your implementation should  #
-  # be very short; ours is less than five lines.                              #
-  #############################################################################
-  pass
-  #############################################################################
-  #                             END OF YOUR CODE                              #
-  #############################################################################
-
-  return dx, dgamma, dbeta
-  
 
 def svm_loss(x, y):
   """

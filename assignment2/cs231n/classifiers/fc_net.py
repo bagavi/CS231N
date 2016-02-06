@@ -231,6 +231,7 @@ class FullyConnectedNet(object):
     # Cast all parameters to the correct datatype
     for k, v in self.params.iteritems():
       self.params[k] = v.astype(dtype)
+    
   def loss(self, X, y=None):
     """
     Compute loss and gradient for the fully-connected net.
@@ -335,7 +336,8 @@ class FullyConnectedNet(object):
           dx, grads[Wi], grads[bi] = affine_relu_backward( dx, output[layer]['cache'] )  
             # Loss due to the regularazitation parameter.
       grads[Wi] += self.reg*self.params[Wi]
-
+    
+    grads['dx'] = dx
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################

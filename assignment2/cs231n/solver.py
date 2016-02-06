@@ -243,7 +243,7 @@ class Solver(object):
       # iteration, and at the end of each epoch.
       first_it = (t == 0)
       last_it = (t == num_iterations + 1)
-      if first_it or last_it or epoch_end:
+      if first_it or last_it or epoch_end or True:
         train_acc = self.check_accuracy(self.X_train, self.y_train,
                                         num_samples=1000)
         val_acc = self.check_accuracy(self.X_val, self.y_val)
@@ -252,7 +252,7 @@ class Solver(object):
 
         if self.verbose:
           print '(Epoch %d / %d) train acc: %f; val_acc: %f' % (
-                 self.epoch, self.num_epochs, train_acc, val_acc)
+                 self.epoch, self.num_epochs, train_acc, val_acc), self.loss_history[-1]
 
         # Keep track of the best model
         if val_acc > self.best_val_acc:
