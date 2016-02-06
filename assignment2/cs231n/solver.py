@@ -243,7 +243,7 @@ class Solver(object):
       # iteration, and at the end of each epoch.
       first_it = (t == 0)
       last_it = (t == num_iterations + 1)
-      if first_it or last_it or epoch_end or True:
+      if first_it or last_it or epoch_end:
         train_acc = self.check_accuracy(self.X_train, self.y_train,
                                         num_samples=1000)
         val_acc = self.check_accuracy(self.X_val, self.y_val)
