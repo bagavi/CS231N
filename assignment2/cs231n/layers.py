@@ -357,7 +357,7 @@ def batchnorm_backward_alt(dout, cache):
   
   Inputs / outputs: Same as batchnorm_backward
   """
-  dx, dgamma, dbeta = None, None, None
+  dx, dgamma, dbeta = batchnorm_backward(dout, cache)
   #############################################################################
   # TODO: Implement the backward pass for batch normalization. Store the      #
   # results in the dx, dgamma, and dbeta variables.                           #
@@ -450,7 +450,7 @@ def dropout_backward(dout, cache):
   return dx
 
 
-def conv_forward_naive(x, w, b, conv_param):
+def cconv_forward_naive(x, w, b, conv_param):
   """
   A naive implementation of the forward pass for a convolutional layer.
 
@@ -505,7 +505,7 @@ def conv_forward_naive(x, w, b, conv_param):
   return out, cache
 
 
-def conv_backward_naive(dout, cache):
+def cconv_backward_naive(dout, cache):
   """
   A naive implementation of the backward pass for a convolutional layer.
 
