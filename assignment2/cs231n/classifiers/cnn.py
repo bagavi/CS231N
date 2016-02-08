@@ -18,7 +18,7 @@ class ThreeLayerConvNet(object):
   
   def __init__(self, input_dim=(3, 32, 32), num_filters=32, filter_size=7,
                hidden_dim=100, num_classes=10, weight_scale=1e-3, reg=0.0,
-               dtype=np.float32):
+               bn_params = {'mode': 'train'}, dtype=np.float32):
     """
     Initialize a new network.
     
@@ -50,15 +50,22 @@ class ThreeLayerConvNet(object):
     #Conv Layer
     self.params['W1'] = np.random.normal(0,weight_scale,[num_filters, input_dim[0], filter_size, filter_size])
     self.params['b1'] = np.zeros(num_filters)
+    self.params['y1'] = np.random.normal( 1 , 1e-3, num_filters)
+    self.params['beta1'] = np.zeros( num_filters )
     
     #Hidden affine layer
     # Dividing by 4 because of the maxpool layer
     self.params['W2'] = np.random.normal(0,weight_scale,[num_filters*input_dim[1]*input_dim[2]/4, hidden_dim])
     self.params['b2'] = np.zeros(hidden_dim)
+    self.params['y2'] = np.random.normal( 1 , 1e-3, hidden_dim)
+    self.params['beta2'] = np.zeros( hidden_dim )
     
     #Output affine layer
     self.params['W3'] = np.random.normal(0,weight_scale,[hidden_dim, num_classes])
     self.params['b3'] = np.zeros(num_classes)
+    
+    self.bn_params = bn_params
+    self.bn_params2 = dict(bn_params)
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
@@ -73,9 +80,9 @@ class ThreeLayerConvNet(object):
     
     Input / output: Same API as TwoLayerNet in fc_net.py.
     """
-    W1, b1 = self.params['W1'], self.params['b1']
-    W2, b2 = self.params['W2'], self.params['b2']
-    W3, b3 = self.params['W3'], self.params['b3']
+    W1, b1, y1, beta1 = self.params['W1'], self.params['b1'], self.params['y1'], self.params['beta1']
+    W2, b2, y2, beta2 = self.params['W2'], self.params['b2'], self.params['y2'], self.params['beta2']
+    W3, b3            = self.params['W3'], self.params['b3']
     
     # pass conv_param to the forward pass for the convolutional layer
     filter_size = W1.shape[2]
@@ -89,9 +96,9 @@ class ThreeLayerConvNet(object):
     # computing the class scores for X and storing them in the scores          #
     # variable.                                                                #
     ############################################################################
-    conv_relu_out, conv_relu_cache = conv_relu_forward(X, W1, b1, conv_param)
+    conv_relu_out, conv_relu_cache = conv_batchnorm_relu_forward(X, W1, b1, conv_param, y1, beta1, self.bn_params)
     maxpool_out, maxpool_cache     = max_pool_forward_fast(conv_relu_out, pool_param)
-    aff_relu_out, aff_relu_cache   = affine_relu_forward(maxpool_out, W2, b2)
+    aff_relu_out, aff_relu_cache   = affine_batchnorm_relu_forward(maxpool_out, W2, b2, y2, beta2, self.bn_params2)
     aff2_out, aff2_cache           = affine_forward(aff_relu_out, W3, b3)
     scores = aff2_out
     ############################################################################
@@ -113,9 +120,9 @@ class ThreeLayerConvNet(object):
     
     
     dx_3, grads['W3'], grads['b3'] = affine_backward( sftm_grad, aff2_cache )
-    dx_2, grads['W2'], grads['b2'] = affine_relu_backward( dx_3, aff_relu_cache )
+    dx_2, grads['W2'], grads['b2'], grads['y2'], grads['beta2'] = affine_batchnorm_relu_backward( dx_3, aff_relu_cache )
     dx_2_prime                     = max_pool_backward_fast( dx_2, maxpool_cache )
-    dx_1, grads['W1'], grads['b1'] = conv_relu_backward( dx_2_prime, conv_relu_cache )
+    dx_1, grads['W1'], grads['b1'], grads['y1'], grads['beta1'] = conv_batchnorm_relu_backward( dx_2_prime, conv_relu_cache )
     
     
     grads['W1'] += self.reg*W1
