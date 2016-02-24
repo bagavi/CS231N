@@ -173,6 +173,7 @@ class CaptioningRNN(object):
         h0, cache_affine                        = affine_forward(features, W_proj, b_proj)
         #(2)
         vocab_captions_in, cache_word_embed     = word_embedding_forward(captions_in, W_embed )
+        # print("captions_in shape", captions_in.shape, N,D,H,T)
         #(3)
         output_word_vectors, cache_lstm         = lstm_forward(vocab_captions_in, h0, Wx, Wh, b)
         #(4)
@@ -255,27 +256,26 @@ class CaptioningRNN(object):
     #(1)
 
     h0, cache_affine 	= affine_forward(features, W_proj, b_proj)
+    print h0.shape
     prev_h 				= h0
-    prev_h 				= prev_h.reshape( [1] + list(prev_h.shape))
+    N,D = prev_h.shape		
+    prev_c              = np.zeros_like(prev_h) 
     captions 			= []
-    vocab_captions, cache_word_embed 	= word_embedding_forward(self._start, W_embed )
+    vocab_captions, cache_word_embed 	= word_embedding_forward([self._start], W_embed )
+    print vocab_captions.shape, N
     print( "features", features.shape, "\n h0", h0.shape)
     if self.cell_type == 'rnn':
-    	while True:
+    	for i in range(17):
     		next_h, _ 		= rnn_step_forward(vocab_captions, prev_h, Wx, Wh, b)
 	        output_vocab, _	= temporal_affine_forward(next_h, W_vocab, b_vocab)
-	        if np.argmax(output_vocab[0][0]) == self._end:
-	        	break
 	        captions.append(np.argmax(output_vocab[0], axis =1) )
     		prev_h 			= next_h
     elif self.cell_type == 'lstm':
-    	while True:
-    		next_h, _ 		= lstm_step_forward(vocab_captions, prev_h, Wx, Wh, b)
-	        output_vocab, _	= temporal_affine_forward(next_h, W_vocab, b_vocab)
-	        if np.argmax(output_vocab[0][0]) == self._end:
-	        	break
+    	for i in range(17):
+    		prev_h, prev_c, _ 		= lstm_step_forward(vocab_captions, prev_h, prev_c, Wx, Wh, b)
+    		reshaped_prev_h = prev_h.reshape([N,1,D])
+	        output_vocab, _	= temporal_affine_forward(reshaped_prev_h, W_vocab, b_vocab)
 	        captions.append(np.argmax(output_vocab[0], axis =1) )
-    		prev_h 			= next_h
 
     ############################################################################
     #                             END OF YOUR CODE                             #
