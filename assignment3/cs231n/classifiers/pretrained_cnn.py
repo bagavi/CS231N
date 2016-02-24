@@ -139,6 +139,7 @@ class PretrainedCNN(object):
 
     prev_a = X
     for i in xrange(start, end + 1):
+      print("prev", np.max(prev_a), prev_a.shape, i)
       i1 = i + 1
       if 0 <= i < len(self.conv_params):
         # This is a conv layer
@@ -220,7 +221,7 @@ class PretrainedCNN(object):
       else:
         raise ValueError('Invalid layer index %d' % i)
       dnext_a = dprev_a
-
+      print(dnext_a)
     dX = dnext_a
     return dX, grads
 
@@ -244,6 +245,7 @@ class PretrainedCNN(object):
     # Note that we implement this by just caling self.forward and self.backward
     mode = 'test' if y is None else 'train'
     scores, cache = self.forward(X, mode=mode)
+    print(scores)
     if mode == 'test':
       return scores
     loss, dscores = softmax_loss(scores, y)

@@ -2,6 +2,7 @@ import numpy as np
 
 from cs231n.layers import *
 from cs231n.rnn_layers import *
+from cs231n.coco_utils import load_coco_data, sample_coco_minibatch, decode_captions
 
 
 class CaptioningRNN(object):
@@ -249,8 +250,35 @@ class CaptioningRNN(object):
     # functions; you'll need to call rnn_step_forward or lstm_step_forward in #
     # a loop.                                                                 #
     ###########################################################################
-    pass
+
+    #Forward Pass
+    #(1)
+
+    h0, cache_affine 	= affine_forward(features, W_proj, b_proj)
+    prev_h 				= h0
+    prev_h 				= prev_h.reshape( [1] + list(prev_h.shape))
+    captions 			= []
+    vocab_captions, cache_word_embed 	= word_embedding_forward(self._start, W_embed )
+    print( "features", features.shape, "\n h0", h0.shape)
+    if self.cell_type == 'rnn':
+    	while True:
+    		next_h, _ 		= rnn_step_forward(vocab_captions, prev_h, Wx, Wh, b)
+	        output_vocab, _	= temporal_affine_forward(next_h, W_vocab, b_vocab)
+	        if np.argmax(output_vocab[0][0]) == self._end:
+	        	break
+	        captions.append(np.argmax(output_vocab[0], axis =1) )
+    		prev_h 			= next_h
+    elif self.cell_type == 'lstm':
+    	while True:
+    		next_h, _ 		= lstm_step_forward(vocab_captions, prev_h, Wx, Wh, b)
+	        output_vocab, _	= temporal_affine_forward(next_h, W_vocab, b_vocab)
+	        if np.argmax(output_vocab[0][0]) == self._end:
+	        	break
+	        captions.append(np.argmax(output_vocab[0], axis =1) )
+    		prev_h 			= next_h
+
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
+    captions = np.array(captions).T
     return captions
