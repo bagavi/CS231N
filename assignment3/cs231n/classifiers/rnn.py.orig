@@ -230,7 +230,6 @@ class CaptioningRNN(object):
     Wx, Wh, b = self.params['Wx'], self.params['Wh'], self.params['b']
     W_vocab, b_vocab = self.params['W_vocab'], self.params['b_vocab']
     
-    captions = self._null * np.ones((N, max_length), dtype=np.int32)
     ###########################################################################
     # TODO: Implement test-time sampling for the model. You will need to      #
     # initialize the hidden state of the RNN by applying the learned affine   #
@@ -256,31 +255,30 @@ class CaptioningRNN(object):
     #Forward Pass
     #(1)
 
-    h, cache_affine 	= affine_forward(features, W_proj, b_proj)
-    N,D = h.shape		
-    sampled_captions = np.zeros((N,1),dtype=np.int32)
-    sampled_captions = sampled_captions + self._start
-    c              = np.zeros_like(h) 
-#     prev_h = prev_h.reshape( [N,1,D] )
-    
-    for time_stamp in range(max_length):
-        z1, cache1 = word_embedding_forward(sampled_captions, W_embed)
-        if( self.cell_type == 'rnn' ):
-            h, cache2 = rnn_step_forward(z1, h, Wx, Wh, b)
-        else:
-            z1 = z1.reshape((z1.shape[0],z1.shape[2]))
-            h, c, cache2 = lstm_step_forward(z1, h, c, Wx, Wh, b)
-        N,H = h.shape
-        h = h.reshape((N,1,H))
-        scores,cache3 = temporal_affine_forward(h, W_vocab, b_vocab)
-        sampled_captions = np.argmax(scores,axis=2).reshape(-1);
-        captions[:,time_stamp] = sampled_captions
-        sampled_captions = sampled_captions.reshape((sampled_captions.shape[0],1))
-        h = h.reshape((h.shape[0],h.shape[2]))
-  
+    h0, cache_affine 	= affine_forward(features, W_proj, b_proj)
+    prev_h 				= h0
+    N,D = prev_h.shape		
+    prev_c              = np.zeros_like(prev_h) 
+    captions 			= []
+    vocab_captions, cache_word_embed 	= word_embedding_forward([self._start], W_embed )
+    if self.cell_type == 'rnn':
+    	for i in range(max_length):
+    		prev_h, _ 		= rnn_step_forward(vocab_captions, prev_h, Wx, Wh, b)
+    		reshaped_prev_h = prev_h.reshape([N,1,D])
+	        output_vocab, _	= temporal_affine_forward(reshaped_prev_h, W_vocab, b_vocab)
+	        output_vocab = output_vocab.reshape([output_vocab.shape[0],output_vocab.shape[2]])
+	        captions.append(np.argmax(output_vocab, axis =1) )
+            
+    elif self.cell_type == 'lstm':
+    	for i in range(max_length):
+    		prev_h, prev_c, _ 		= lstm_step_forward(vocab_captions, prev_h, prev_c, Wx, Wh, b)
+    		reshaped_prev_h = prev_h.reshape([N,1,D])
+	        output_vocab, _	= temporal_affine_forward(reshaped_prev_h, W_vocab, b_vocab)
+	        output_vocab = output_vocab.reshape([output_vocab.shape[0],output_vocab.shape[2]])
+	        captions.append(np.argmax(output_vocab, axis =1) )
+
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
-    
+    captions = np.array(captions).T
     return captions
-
