@@ -256,22 +256,19 @@ class CaptioningRNN(object):
     #(1)
 
     h0, cache_affine 	= affine_forward(features, W_proj, b_proj)
-    print h0.shape
     prev_h 				= h0
     N,D = prev_h.shape		
     prev_c              = np.zeros_like(prev_h) 
     captions 			= []
     vocab_captions, cache_word_embed 	= word_embedding_forward([self._start], W_embed )
-    print vocab_captions.shape, N
-    print( "features", features.shape, "\n h0", h0.shape)
     if self.cell_type == 'rnn':
-    	for i in range(17):
+    	for i in range(max_length):
     		next_h, _ 		= rnn_step_forward(vocab_captions, prev_h, Wx, Wh, b)
 	        output_vocab, _	= temporal_affine_forward(next_h, W_vocab, b_vocab)
 	        captions.append(np.argmax(output_vocab[0], axis =1) )
     		prev_h 			= next_h
     elif self.cell_type == 'lstm':
-    	for i in range(17):
+    	for i in range(17):	
     		prev_h, prev_c, _ 		= lstm_step_forward(vocab_captions, prev_h, prev_c, Wx, Wh, b)
     		reshaped_prev_h = prev_h.reshape([N,1,D])
 	        output_vocab, _	= temporal_affine_forward(reshaped_prev_h, W_vocab, b_vocab)
